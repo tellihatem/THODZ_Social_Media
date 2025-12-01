@@ -4,8 +4,12 @@
  * Update these settings for your environment
  */
 
-// Base URL - change this for production
-define('BASE_URL', 'http://localhost:8080');
+// Base URL - auto-detect protocol and host, or use environment variable
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') 
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+    ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
+define('BASE_URL', getenv('BASE_URL') ?: "{$protocol}://{$host}");
 
 // Database settings (used by Docker, can be overridden)
 define('DB_HOST', getenv('DB_HOST') ?: 'db');

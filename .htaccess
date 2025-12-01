@@ -1,9 +1,17 @@
 # Enable URL rewriting
 RewriteEngine On
 
-# Redirect to HTTPS (uncomment for production)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# Redirect to HTTPS (for production - Koyeb/cloud hosting)
+# Skip redirect if:
+# - Already HTTPS, OR
+# - Behind a proxy with X-Forwarded-Proto: https (Koyeb, Heroku, etc.), OR
+# - Running on localhost/127.0.0.1 (local development)
+RewriteCond %{HTTP:X-Forwarded-Proto} =https [OR]
+RewriteCond %{HTTPS} on [OR]
+RewriteCond %{HTTP_HOST} ^localhost [NC,OR]
+RewriteCond %{HTTP_HOST} ^127\.0\.0\.1
+RewriteRule ^ - [S=1]
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Remove trailing slash (optional, keeps URLs consistent)
 RewriteCond %{REQUEST_FILENAME} !-d
@@ -17,7 +25,9 @@ RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.+)$ $1.php [L,QSA]
 
 # Redirect .php URLs to clean URLs (optional SEO improvement)
+# Skip this for API calls to avoid redirect loops
 RewriteCond %{THE_REQUEST} \s/(.+?)\.php[\s?] [NC]
+RewriteCond %{REQUEST_URI} !^/api/ [NC]
 RewriteRule ^ /%1 [R=301,L]
 
 # Protect sensitive files

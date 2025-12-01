@@ -6,12 +6,12 @@
 if (!isset($comment) || !is_array($comment)) return;
 ?>
 <div class="comment" id="comment_<?php echo $comment['pid']; ?>">
-    <a href="./profile_new.php?uid=<?php echo $comment['owner']; ?>">
+    <a href="./profile.php?uid=<?php echo $comment['owner']; ?>">
         <img src="<?php echo htmlspecialchars($commentUserImg); ?>" alt="Profile" class="comment-avatar">
     </a>
     <div class="comment-content">
         <div class="comment-bubble">
-            <a href="./profile_new.php?uid=<?php echo $comment['owner']; ?>" class="comment-author">
+            <a href="./profile.php?uid=<?php echo $comment['owner']; ?>" class="comment-author">
                 <?php echo htmlspecialchars($commentUser['fname'] . ' ' . $commentUser['lname']); ?>
             </a>
             <p class="comment-text"><?php echo html_entity_decode($comment['post']); ?></p>

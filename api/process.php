@@ -86,7 +86,7 @@ elseif ($action == 'getlikes'){
 				$full_name = htmlspecialchars(html_entity_decode($user_liked['fname']) . " " . html_entity_decode($user_liked['lname']));
 				
 				echo '<div class="likes-item">';
-				echo '<a href="./profile_new.php?uid=' . $user_liked['uid'] . '" class="likes-item-user">';
+				echo '<a href="./profile.php?uid=' . $user_liked['uid'] . '" class="likes-item-user">';
 				echo '<img src="' . htmlspecialchars($profile_image) . '" alt="Profile" class="likes-item-avatar">';
 				echo '<span class="likes-item-name">' . $full_name . '</span>';
 				echo '</a>';
@@ -122,7 +122,7 @@ elseif ($action == 'chatusers'){
 		      	$user_chat_profile_img = $images->get_thumb_profile($user_chat_profile_img);
       	  		$user_chat_profile_img = "." . substr($user_chat_profile_img,strpos($user_chat_profile_img,"/"),strlen($user_chat_profile_img));
 				($user_chat['status'] == "offline") ? $offline = "offline" : $offline = "";
-				echo "<a href='chat_new.php?uid=".$user_chat['uid']."'>
+				echo "<a href='chat.php?uid=".$user_chat['uid']."'>
 	          <div class='content'>
 	            <img src='".$user_chat_profile_img."' alt=''>
 	            <div class='details'>
@@ -165,7 +165,7 @@ elseif ($action == 'chatsearch'){
       	  	$user_chat_profile_img = "." . substr($user_chat_profile_img,strpos($user_chat_profile_img,"/"),strlen($user_chat_profile_img));
 				$lastMessage = $chat->getLastMessage($user_chat['uid'],$uid);
 				($user_chat['status'] == "offline") ? $offline = "offline" : $offline = "";
-				echo "<a href='chat_new.php?uid=".$user_chat['uid']."'>
+				echo "<a href='chat.php?uid=".$user_chat['uid']."'>
 	          <div class='content'>
 	            <img src='".$user_chat_profile_img."' alt=''>
 	            <div class='details'>
@@ -244,7 +244,7 @@ elseif ($action == 'thodzsearch'){
                 }
                 $usersearch_profile_img = $images->get_thumb_profile($usersearch_profile_img);
                 $fullName = htmlspecialchars(html_entity_decode($usersearch['fname']) . ' ' . html_entity_decode($usersearch['lname']));
-                echo "<a href='./profile_new.php?uid=".$usersearch['uid']."' class='search-result-item'>
+                echo "<a href='./profile.php?uid=".$usersearch['uid']."' class='search-result-item'>
                     <img src='".htmlspecialchars($usersearch_profile_img)."' alt='Profile'>
                     <span>".$fullName."</span>
                 </a>";

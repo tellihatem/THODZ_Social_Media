@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (isset($_SESSION['IS_LOGGED']) && $_SESSION['IS_LOGGED'] == true && isset($_SESSION['uid'])){
-    header("location: ./home_new.php");
+    header("location: ./home.php");
     die();
 }
 ?>
@@ -10,7 +10,7 @@ if (isset($_SESSION['IS_LOGGED']) && $_SESSION['IS_LOGGED'] == true && isset($_S
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THODZ - Log In or Sign Up</title>
+    <title>Reset Password - THODZ</title>
     <link rel="stylesheet" href="Styles/app.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="./images/logo.png">
@@ -20,41 +20,41 @@ if (isset($_SESSION['IS_LOGGED']) && $_SESSION['IS_LOGGED'] == true && isset($_S
         <div class="auth-wrapper">
             <div class="auth-branding">
                 <h1>THODZ</h1>
-                <p>Connect with friends and the world around you on THODZ.</p>
+                <p>Reset your password</p>
             </div>
             
             <div class="auth-card">
-                <form id="loginForm" class="auth-form">
-                    <input type="email" name="email" class="auth-input" placeholder="Email address" required>
-                    <input type="password" name="password" class="auth-input" placeholder="Password" required>
-                    <button type="submit" class="auth-btn">Log In</button>
+                <h2 style="margin-bottom: 16px; font-size: 20px;">Find Your Account</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Enter your email address and we'll send you a link to reset your password.</p>
+                
+                <form id="forgetForm" class="auth-form">
+                    <input type="email" name="email_forgot" class="auth-input" placeholder="Email address" required>
+                    <button type="submit" class="auth-btn">Send Reset Link</button>
                 </form>
                 
-                <div id="loginMessage" class="auth-message"></div>
-                
-                <div class="auth-link" onclick="location.href='./forget.php'">Forgotten password?</div>
+                <div id="forgetMessage" class="auth-message"></div>
                 
                 <div class="auth-divider"></div>
                 
-                <button class="auth-signup-btn" onclick="location.href='./signup_new.php'">Create New Account</button>
+                <div class="auth-link" onclick="location.href='./login.php'">Back to Login</div>
             </div>
         </div>
     </div>
 
     <script src="./Js/jquery.min.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        document.getElementById('forgetForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const form = this;
             const formData = new FormData(form);
-            const messageEl = document.getElementById('loginMessage');
+            const messageEl = document.getElementById('forgetMessage');
             const submitBtn = form.querySelector('button[type="submit"]');
             
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Logging in...';
+            submitBtn.textContent = 'Sending...';
             
             try {
-                const response = await fetch('/api/ajax.php?action=login', {
+                const response = await fetch('/api/ajax.php?action=forget', {
                     method: 'POST',
                     body: new URLSearchParams(formData)
                 });
@@ -65,17 +65,15 @@ if (isset($_SESSION['IS_LOGGED']) && $_SESSION['IS_LOGGED'] == true && isset($_S
                     messageEl.textContent = data.message;
                 } else {
                     messageEl.className = 'auth-message success';
-                    messageEl.textContent = 'Login successful! Redirecting...';
-                    setTimeout(() => {
-                        window.location.href = '/home_new.php';
-                    }, 500);
+                    messageEl.textContent = data.message || 'Reset link sent! Check your email.';
+                    form.reset();
                 }
             } catch (error) {
                 messageEl.className = 'auth-message error';
                 messageEl.textContent = 'An error occurred. Please try again.';
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Log In';
+                submitBtn.textContent = 'Send Reset Link';
             }
         });
     </script>

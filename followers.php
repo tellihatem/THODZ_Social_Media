@@ -1,294 +1,149 @@
 <?php
-// Redirect to new followers page
-header("Location: ./followers_new.php");
-exit;
-
- session_start();
- if (!(isset($_SESSION['IS_LOGGED']) && $_SESSION['IS_LOGGED'] == true && isset($_SESSION['uid']))){
+session_start();
+if (!(isset($_SESSION['IS_LOGGED']) && $_SESSION['IS_LOGGED'] == true && isset($_SESSION['uid']))){
     header("location: ./login.php");
     die();
- }
- require_once('./models/user.class.php');
- $uid = isset($_SESSION['uid']) ? $_SESSION['uid'] : 0;
- $user = new User();
- $_USER_DATA = $user->getData($uid);
- require_once('./models/post.class.php');
- //$posts = $post->getTimeLine($uid);
- $following = $user->getFollowing($uid,"user");
- require_once('./controler/image.controler.php');
- $image = new Image();
+}
+
+require_once('./models/user.class.php');
+require_once('./controler/image.controler.php');
+
+$user = new User();
+$images = new Image();
+
+$currentUserId = $_SESSION['uid'];
+$currentUser = $user->getData($currentUserId);
+$currentUserImg = $images->get_thumb_profile($currentUser['profileimg']);
+
+// Get followers
+$followers = $user->getFollowers($currentUserId, 'user');
+$followersList = [];
+if (is_array($followers)) {
+    foreach ($followers as $follower) {
+        $followerData = $user->getData($follower['uid']);
+        if ($followerData) {
+            $followersList[] = $followerData;
+        }
+    }
+}
+
+// Get who current user is following (to show follow/unfollow status)
+$following = $user->getFollowing($currentUserId, 'user');
+if (!is_array($following)) {
+    $following = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">  
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THODZ|Home</title>
+    <title>Followers | THODZ</title>
+    <link rel="stylesheet" href="Styles/app.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="./images/logo.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous">
-    <link rel="stylesheet" href="./Styles/home.css?v=<?php echo(rand(0,9e6)); ?>">
-    <style type="text/css">
-      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap");
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="./home.php">
+                <img src="./images/logo.png" alt="THODZ" class="navbar-logo">
+            </a>
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search THODZ" autocomplete="off">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+        </div>
 
-      body {
-        font-family: "Poppins", sans-serif;
-      }
-      .container{
-        display: flex;
-        flex-wrap: wrap;
-        flex-direction: row;
-        margin-top: 90px;
-        justify-content: center;
-      }
-      .flip-container {
-        width: 280px;
-        height: 380px;
-        background-color: transparent;
-        border: 1px solid transparent;
-        border-radius: 10px;
-        perspective: 1000px;
-        padding: 10px;
-      }
+        <div class="navbar-center">
+            <a href="./home.php" class="nav-link">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="./following.php" class="nav-link">
+                <i class="fas fa-user-friends"></i>
+            </a>
+            <a href="./followers.php" class="nav-link active">
+                <i class="fas fa-users"></i>
+            </a>
+        </div>
 
-      .flip-inner-container {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        text-align: center;
-        transform-style: preserve-3d;
-        transition: transform 0.8s;
-      }
+        <div class="navbar-right">
+            <a href="./profile.php" class="nav-profile">
+                <img src="<?php echo htmlspecialchars($currentUserImg); ?>" alt="Profile">
+                <span><?php echo htmlspecialchars($currentUser['fname']); ?></span>
+            </a>
+            <button class="nav-icon-btn dropdown-trigger">
+                <i class="fas fa-caret-down"></i>
+            </button>
+            <div class="dropdown-menu">
+                <a href="./profile.php" class="dropdown-header">
+                    <img src="<?php echo htmlspecialchars($currentUserImg); ?>" alt="Profile">
+                    <div class="dropdown-header-info">
+                        <h4><?php echo htmlspecialchars($currentUser['fname'] . ' ' . $currentUser['lname']); ?></h4>
+                        <span>See your profile</span>
+                    </div>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="./logout.php" class="dropdown-item">
+                    <div class="dropdown-item-icon"><i class="fas fa-sign-out-alt"></i></div>
+                    <span>Log Out</span>
+                </a>
+            </div>
+        </div>
+    </nav>
 
-      .flip-container:hover .flip-inner-container {
-        transform: rotateY(180deg);
-        cursor: pointer;
-      }
+    <!-- Main Content -->
+    <div class="users-container">
+        <div class="users-header">
+            <h1><i class="fas fa-users"></i> Followers</h1>
+            <p>People who follow you</p>
+        </div>
 
-      .flip-front,
-      .flip-back {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        backface-visibility: hidden;
-        border-radius: 10px;
-      }
-      .flip-front {
-        background: white;
-        padding: 2px;
-      }
-
-      .flip-front img {
-        width: 100%;
-        height: 100%;
-        border-radius: 10px;
-      }
-
-      .flip-back {
-        width: 280px;
-        height: 380px;
-        background: white;
-        transform: rotateY(180deg);
-      }
-
-      .flip-back .profile-image img {
-        width: 130px;
-        height: 130px;
-        border-radius: 50%;
-        border: 4px solid #2d88ff;
-        margin-top: 20px;
-      }
-
-      .flip-back p {
-        font-size: 13px;
-        font-weight: 500;
-      }
-
-      .flip-back ul {
-        display: flex;
-        margin: 20px 20px;
-      }
-
-      .flip-back ul a {
-        display: block;
-        height: 40px;
-        width: 150px;
-        color: #fff;
-        text-align: center;
-        margin: 0 7px;
-        line-height: 38px;
-        border: 2px solid transparent;
-        border-radius: 70px;
-        background: #2d88ff;
-        text-decoration: none;
-      }
-      .flip-back ul a:hover {
-        color: #2d88ff;
-        border-color: #2d88ff;
-        background: linear-gradient(375deg, transparent, transparent);
-      }
-    </style>
-  </head>
-  <body>
-    <div class="setting-menu" style="display: none;">
-        <div class="settings-menu-inner">
-            <div class="user-profile">
-                <img src="<?php echo $image->get_thumb_profile($_USER_DATA['profileimg']); ?>" alt="">
-                <div>
-                    <p><?php echo html_entity_decode($_USER_DATA['fname']) . " " . html_entity_decode($_USER_DATA['lname']); ?></p>
-                   <a href="./profile.php?uid=<?php echo $_USER_DATA['uid']; ?>">See your profile</a>
+        <div class="users-grid">
+            <?php if (count($followersList) > 0): ?>
+                <?php foreach ($followersList as $follower): 
+                    $followerImg = $images->get_thumb_profile($follower['profileimg']);
+                    $isFollowingBack = in_array($follower['uid'], $following);
+                ?>
+                <div class="user-card">
+                    <a href="./profile.php?uid=<?php echo $follower['uid']; ?>">
+                        <img src="<?php echo htmlspecialchars($followerImg); ?>" alt="Profile" class="user-card-avatar">
+                    </a>
+                    <div class="user-card-info">
+                        <a href="./profile.php?uid=<?php echo $follower['uid']; ?>">
+                            <h3><?php echo htmlspecialchars($follower['fname'] . ' ' . $follower['lname']); ?></h3>
+                        </a>
+                        <p><?php echo $isFollowingBack ? 'You follow each other' : 'Follows you'; ?></p>
+                    </div>
+                    <div class="user-card-actions">
+                        <?php if ($follower['uid'] != $currentUserId): ?>
+                        <button class="btn <?php echo $isFollowingBack ? 'btn-success following' : 'btn-primary'; ?> like-btn" 
+                                data-type="user" data-id="<?php echo $follower['uid']; ?>">
+                            <i class="fas <?php echo $isFollowingBack ? 'fa-user-check' : 'fa-user-plus'; ?>"></i>
+                            <span><?php echo $isFollowingBack ? 'Following' : 'Follow'; ?></span>
+                        </button>
+                        <?php endif; ?>
+                        <a href="./chat.php?uid=<?php echo $follower['uid']; ?>" class="btn btn-secondary btn-icon">
+                            <i class="fas fa-comment"></i>
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <hr>
-            <div class="user-profile">
-                <img src="images/feedback.png" alt="">
-                <div>
-                    <p>Give Feedback</p>
-                   <a href="#">Help us to improve our website</a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="user-card" style="grid-column: 1 / -1; justify-content: center; padding: 40px;">
+                    <div style="text-align: center;">
+                        <i class="fas fa-user-friends" style="font-size: 48px; color: var(--text-muted); margin-bottom: 16px;"></i>
+                        <h3 style="color: var(--text-secondary);">No Followers Yet</h3>
+                        <p style="color: var(--text-muted);">When people follow you, they'll appear here.</p>
+                    </div>
                 </div>
-            </div>
-            <hr>
-            <div class="setting-links">
-                <img src="images/setting.png" class="settings-icon">
-                <a href="./profile.php?redirect=settings">Settings <img src="images/arrow.png" width="10px"></a>
-            </div>
-            <div class="setting-links">
-                <img src="images/help.png" class="settings-icon">
-                <a href="#">Help & and Support<img src="images/arrow.png" width="10px"></a>
-            </div>
-            <div class="setting-links">
-                <img src="images/display.png" class="settings-icon">
-                <a href="#">Display & Accesibility<img src="images/arrow.png" width="10px"></a>
-            </div>
-            <div class="setting-links">
-                <img src="images/logout.png" class="settings-icon">
-                <a href="./logout.php">Logout <img src="images/arrow.png" width="10px"></a>
-            </div>
+            <?php endif; ?>
         </div>
     </div>
-    <div class="navbar">
-      <div class="navbar_left">
-        <a href="./home.php">
-          <img class="navbar_logo" src="./images/logo.png" alt="logo">
-        </a>
-        <div class="input-icons">
-          <i class="fas fa-search icon"></i>
-          <a href="#">
-            <input class="input-field" type="text" placeholder="Search on THODZ" id="searchInput">
-          </a>
-        </div>
-      </div>
 
-      <div class="navbar_center">
-        
-        <a href="home.php" id="home_icon">
-          <i class="fas fa-home"></i>
-        </a>
-
-        <a href="following.php" id="following_icon">
-          <i class="fas fa-user-friends"></i>
-        </a>
-        
-        <a href="followers.php"  class="active_icon" id="followers_icon">
-          <i class="fas fa-users"></i>
-        </a>
-      </div>
-
-      <div class="navbar_right">
-        <div class="navbar_right_profile">
-          <a href="./profile.php">
-            <img src="<?php echo $image->get_thumb_profile($_USER_DATA['profileimg']) ?>" alt="profile">
-          </a>
-          <span><?php echo html_entity_decode($_USER_DATA['fname']); ?></span>
-        </div>
-        <div class="navbar_right_links">
-          <a href="./users_chat.php">
-            <i class="fab fa-facebook-messenger"></i>
-          </a>
-          <a href="#" onclick="SettingMenuToggle()">
-            <i class="fas fa-arrow-down"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-    <div class="container">
-      <?php 
-        $followers = $user->getFollowers($_SESSION['uid'],'user');
-        if (is_array($followers)){
-          foreach($followers as $follower){
-            $follower_data = $user->getData($follower['uid']);
-            if (isset($follower_data['profileimg']) && !empty($follower_data['profileimg'])){
-                $follower_image = $image->get_thumb_profile($follower_data['profileimg']);
-            }else{
-                $follower_image = "./images/user_female.jpg";
-                if ($follower_data['gender'] == 'male'){
-                    $follower_image = "./images/user_male.jpg";
-                }
-            }
-            $follower_image = "." . substr($follower_image,strpos($follower_image,"/"),strlen($follower_image));
-
-            $follower_fullname = html_entity_decode($follower_data['fname']) ." ". html_entity_decode($follower_data['lname']);
-            $follower_profile = "profile.php?uid=" . $follower_data['uid'];
-            $follower_about = html_entity_decode($follower_data['about']);
-      ?>
-      <div class="flip-container">
-        <div class="flip-inner-container">
-          <div class="flip-front">
-            <img src="<?php echo $follower_image; ?>" />
-            <h2 style="position: absolute;bottom: 0;right: 0;width: 100%;font-weight: bold;background: white;"><?php echo $follower_fullname; ?></h2>
-          </div>
-          <div class="flip-back">
-            <div class="profile-image">
-              <img src="<?php echo $follower_image ?>" />
-              <h2><?php echo $follower_fullname; ?></h2>
-              <p><?php echo $follower_about; ?></p>
-
-              <ul>
-                <a href="./profile.php?uid=<?php echo $follower_data['uid']; ?>"><span>Profile</span></i></a>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-      <?php }
-        }
-      ?>
-    </div>
-    <!-- search list container -->
-    <div class="search_list_wrapper" state="hidden" style="display: none;">
-        <div class="close_search_list"><span>X</span></div>
-        <div class="search_list_container">
-            
-            <input type="text" placeholder="Person Name" id="SearchInputInside">
-            <div id="userList_search">
-                
-            </div>
-        </div>
-    </div>
-    <script src="./Js/jquery.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="./Js/script.js?v=<?php echo(rand(0,9e6)); ?>"></script>
-    <script type="text/javascript">
-      let settingsMenu = false;
-        function SettingMenuToggle () {
-            if(settingsMenu) {
-                document.querySelector(".setting-menu").style.display = "none";
-                // $(".setting-menu").slideUp("slow");
-            } else{
-                document.querySelector(".setting-menu").style.display = "block";
-                // $(".setting-menu").slideDown("slow");
-            }
-            settingsMenu = !settingsMenu;
-        }
-      $("#searchInput").click(function(){
-            $(".search_list_wrapper").css("display","flex");
-            $(".search_list_wrapper").attr("state" , "visible");
-        });
-
-        $(".close_search_list , .close_search_list span").click(function(){
-            $("#userList_search").empty();
-            document.getElementById("SearchInputInside").value = "";
-            $(".search_list_wrapper").css("display","none");
-            $(".search_list_wrapper").attr("state" , "hidden");
-        });
-    </script>
-  </body>
+    <script src="./Js/jquery.min.js"></script>
+    <script src="./Js/app.js?v=<?php echo time(); ?>"></script>
+</body>
 </html>

@@ -1,9 +1,9 @@
-<?php 
-if(!isset($_SESSION['IS_LOGGED'])){
-	require_once('./login.php');
-}else{
-	require_once('./home.php');
+<?php
+session_start();
+if (isset($_SESSION['IS_LOGGED']) && $_SESSION['IS_LOGGED'] == true && isset($_SESSION['uid'])) {
+    header("Location: ./home.php");
+} else {
+    header("Location: ./login.php");
 }
-
-?>
+exit;
 

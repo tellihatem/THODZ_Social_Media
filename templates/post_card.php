@@ -7,7 +7,7 @@ if (!isset($POST) || !is_array($POST)) return;
 ?>
 <div class="card post" data-post-id="<?php echo $POST['pid']; ?>">
     <div class="post-header">
-        <a href="./profile_new.php?uid=<?php echo $POST['owner']; ?>" class="post-author">
+        <a href="./profile.php?uid=<?php echo $POST['owner']; ?>" class="post-author">
             <img src="<?php echo htmlspecialchars($postUserImg); ?>" alt="Profile">
             <div class="post-author-info">
                 <h4><?php echo htmlspecialchars($postUser['fname'] . ' ' . $postUser['lname']); ?></h4>
