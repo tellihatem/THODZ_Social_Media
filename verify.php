@@ -12,7 +12,7 @@ if (!isset($_GET['email']) || !isset($_GET['token'])) {
     $token = htmlspecialchars(trim($_GET['token']));
     
     // Check if token is valid and not expired (24 hours)
-    $stmt = $_link->prepare('SELECT uid, email, fname, token, created_at FROM users WHERE email = ? AND token = ? AND isEmailConfirmed = 0');
+    $stmt = $_link->prepare('SELECT uid, email, fname, token, created_at FROM users WHERE email = ? AND token = ? AND isemailconfirmed = 0');
     $stmt->bindParam(1, $email, PDO::PARAM_STR);
     $stmt->bindParam(2, $token, PDO::PARAM_STR);
     
@@ -22,7 +22,7 @@ if (!isset($_GET['email']) || !isset($_GET['token'])) {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
         // Verify the user
-        $updateStmt = $_link->prepare('UPDATE users SET isEmailConfirmed = 1, token = NULL WHERE email = ?');
+        $updateStmt = $_link->prepare('UPDATE users SET isemailconfirmed = 1, token = '' WHERE email = ?');
         $updateStmt->bindParam(1, $email, PDO::PARAM_STR);
         
         if ($updateStmt->execute()) {
@@ -33,13 +33,13 @@ if (!isset($_GET['email']) || !isset($_GET['token'])) {
         }
     } else {
         // Check if already verified
-        $checkStmt = $_link->prepare('SELECT isEmailConfirmed FROM users WHERE email = ?');
+        $checkStmt = $_link->prepare('SELECT isemailconfirmed FROM users WHERE email = ?');
         $checkStmt->bindParam(1, $email, PDO::PARAM_STR);
         $checkStmt->execute();
         
         if ($checkStmt->rowCount() > 0) {
             $result = $checkStmt->fetch(PDO::FETCH_ASSOC);
-            if ($result['isEmailConfirmed'] == 1) {
+            if ($result['isemailconfirmed'] == 1) {
                 $success = true;
                 $message = 'Your email is already verified!';
             } else {

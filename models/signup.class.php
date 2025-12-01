@@ -29,7 +29,7 @@ class Signup {
 		$stmt = null;
 	}
 	protected function SignUp ($fname,$lname,$email,$password,$gender,$token) {
-		$stmt = $this->_link->prepare('INSERT INTO users (fname, lname, email, password, gender, isEmailConfirmed, token, likes, profileimg, about, status)
+		$stmt = $this->_link->prepare('INSERT INTO users (fname, lname, email, password, gender, isemailconfirmed, token, likes, profileimg, about, status)
 		 VALUES (?,?,?,?,?,?,?,?,?,?,?);');
 
 		$stmt->bindParam(1, $fname, PDO::PARAM_STR);

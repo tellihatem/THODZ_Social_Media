@@ -73,7 +73,7 @@ class Settings {
 			}else{
 				$zero = 0;
 				$token = (new CodeVerify())->SetCode();;
-				$stmt = $this->_link->prepare('UPDATE users SET fname = ?, lname = ?, email = ?, isEmailConfirmed = ? ,token = ? WHERE uid = ?');
+				$stmt = $this->_link->prepare('UPDATE users SET fname = ?, lname = ?, email = ?, isemailconfirmed = ? ,token = ? WHERE uid = ?');
 				$stmt->bindParam(1,$fname,PDO::PARAM_STR);
 				$stmt->bindParam(2,$lname,PDO::PARAM_STR);
 				$stmt->bindParam(3,$email,PDO::PARAM_STR);

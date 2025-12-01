@@ -8,7 +8,7 @@ require_once('database.class.php');
 		$_link = (new Database())->connect();
 		$email = $_GET['email'];
 		$token = $_GET['token'];
-		$stmt = $_link->prepare('SELECT email from users WHERE email = ? AND token = ? AND isEmailConfirmed = ?;');
+		$stmt = $_link->prepare('SELECT email from users WHERE email = ? AND token = ? AND isemailconfirmed = ?;');
 		$stmt->bindParam(1, $email, PDO::PARAM_STR);
 		$stmt->bindParam(2, $token, PDO::PARAM_STR);
 		$isEmailConfirmed = 0;
@@ -19,7 +19,7 @@ require_once('database.class.php');
 			die();
 		}
 		if ($stmt->rowCount() > 0){
-			$stmt = $_link->prepare('UPDATE users SET isEmailConfirmed = :isEmailConfirmed , token = :token WHERE email = :email;');
+			$stmt = $_link->prepare('UPDATE users SET isemailconfirmed = :isEmailConfirmed , token = :token WHERE email = :email;');
 			$isEmailConfirmed = 1;
 			$stmt->bindParam(':isEmailConfirmed', $isEmailConfirmed, PDO::PARAM_INT);
 			$token = '';

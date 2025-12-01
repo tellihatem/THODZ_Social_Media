@@ -16,12 +16,12 @@ CREATE TABLE users (
     email VARCHAR(256) NOT NULL UNIQUE,
     password VARCHAR(256) NOT NULL,
     profileimg VARCHAR(256) NOT NULL DEFAULT '',
-    "isEmailConfirmed" SMALLINT NOT NULL DEFAULT 0,
+    isemailconfirmed SMALLINT NOT NULL DEFAULT 0,
     token VARCHAR(10) NOT NULL DEFAULT '',
     likes INTEGER NOT NULL DEFAULT 0,
     about TEXT NOT NULL DEFAULT '',
     status VARCHAR(8) NOT NULL DEFAULT 'offline',
-    datecreate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Posts table
@@ -67,7 +67,7 @@ CREATE INDEX idx_likes_contentid ON likes(contentid);
 CREATE INDEX idx_users_email ON users(email);
 
 -- Insert demo users (password is 'THODZ' + md5('1234') = 'THODZ81dc9bdb52d04dc20036dbd8313ed055')
-INSERT INTO users (fname, lname, gender, email, password, profileimg, "isEmailConfirmed", token, likes, about, status)
+INSERT INTO users (fname, lname, gender, email, password, profileimg, isemailconfirmed, token, likes, about, status)
 VALUES 
     ('Demo', 'UserOne', 'male', 'user1@example.com', 'THODZ81dc9bdb52d04dc20036dbd8313ed055', '', 1, '', 0, '', 'offline'),
     ('Demo', 'UserTwo', 'male', 'user2@example.com', 'THODZ81dc9bdb52d04dc20036dbd8313ed055', '', 1, '', 0, '', 'offline'),

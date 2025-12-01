@@ -53,7 +53,7 @@ class Login{
 		}
 		
 		// Check if email is confirmed
-		if (!$user['isEmailConfirmed']) {
+		if (!$user['isemailconfirmed']) {
 			return "Error: Please verify your email. Check your inbox for the confirmation link.";
 		}
 		
