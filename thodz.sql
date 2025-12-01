@@ -131,7 +131,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Hatem','Telli','male','ramiro-ramos@live.fr','THODZ81dc9bdb52d04dc20036dbd8313ed055','THODZ_6288de33c464f6.53517784.jpg',1,'',2,'','offline','2022-05-21 12:40:45'),(2,'Gladius','Dz','male','azomaki07@gmail.com','THODZ81dc9bdb52d04dc20036dbd8313ed055','THODZ_6288de6a0a9555.11391244.jpg',1,'ew1cfn8*Hi',3,'','offline','2022-05-21 12:41:00'),(3,'Ghoust','Dz','male','7atemtelli@gmail.com','THODZ81dc9bdb52d04dc20036dbd8313ed055','THODZ_6288edd4e58e93.18530051.jpg',1,'',3,'','offline','2022-05-21 12:41:20');
+INSERT INTO `users` VALUES (1,'Demo','UserOne','male','user1@example.com','THODZ81dc9bdb52d04dc20036dbd8313ed055','THODZ_6288de33c464f6.53517784.jpg',1,'',2,'','offline','2022-05-21 12:40:45'),(2,'Demo','UserTwo','male','user2@example.com','THODZ81dc9bdb52d04dc20036dbd8313ed055','THODZ_6288de6a0a9555.11391244.jpg',1,'token123',3,'','offline','2022-05-21 12:41:00'),(3,'Demo','UserThree','male','user3@example.com','THODZ81dc9bdb52d04dc20036dbd8313ed055','THODZ_6288edd4e58e93.18530051.jpg',1,'',3,'','offline','2022-05-21 12:41:20');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
