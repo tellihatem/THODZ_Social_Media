@@ -15,6 +15,9 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
+# Allow .htaccess overrides
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+
 # Set working directory
 WORKDIR /var/www/html
 

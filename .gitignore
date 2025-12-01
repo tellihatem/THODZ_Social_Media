@@ -24,3 +24,7 @@ uploads/*
 # Dependencies
 vendor/
 node_modules/
+
+# Personal files
+.txt
+.zip
