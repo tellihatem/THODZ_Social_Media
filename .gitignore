@@ -25,6 +25,6 @@ uploads/*
 vendor/
 node_modules/
 
-# Personal files
-.txt
-.zip
+# Personal files (root-level only)
+*.txt
+*.zip
