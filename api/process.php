@@ -199,8 +199,8 @@ elseif ($action == 'chatmessages'){
 			$messages = $chat->getMessages($uid,$chat_with);
 			if (is_array($messages)){
 				foreach($messages as $message){
-					// Sanitize message output to prevent XSS
-					$safeMsg = htmlspecialchars($message['msg'], ENT_QUOTES, 'UTF-8');
+					// Decode then re-encode for safe display (prevents double-encoding)
+					$safeMsg = htmlspecialchars(html_entity_decode($message['msg']), ENT_QUOTES, 'UTF-8');
 					$safeProfileImg = htmlspecialchars($chat_user['profileimg'], ENT_QUOTES, 'UTF-8');
 					if ($message['outgoing_msg_id'] == $uid){ //that mean he is the sender
 						echo "<div class='chat outgoing'>

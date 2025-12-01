@@ -85,30 +85,48 @@ else{
 		}
 	}
 	elseif($action == 'post'){
-		require_once('../models/post.class.php');
-		$post = new Post();
-		$text = !isset($_POST['textarea']) ? '' : htmlentities(trim($_POST['textarea']));
-		$img = !isset($_FILES['image']) ? '' : $_FILES['image'];
-		$result = $post->createPost($text,$img,"post",0);
-		if ($result !== false){
-			$json = [
-				'success' => true,
-				'pid' => $result
-			];
+		if (session_status() == PHP_SESSION_NONE) {
+			session_start();
+		}
+		if (!isset($_SESSION['IS_LOGGED']) || !$_SESSION['IS_LOGGED'] || !isset($_SESSION['uid'])) {
+			$json = ['error' => true, 'message' => 'Please login first'];
+		} else {
+			require_once('../models/post.class.php');
+			$post = new Post();
+			$text = !isset($_POST['textarea']) ? '' : htmlentities(trim($_POST['textarea']));
+			$img = !isset($_FILES['image']) ? '' : $_FILES['image'];
+			$result = $post->createPost($text,$img,"post",0);
+			if ($result !== false){
+				$json = [
+					'success' => true,
+					'pid' => $result
+				];
+			} else {
+				$json = ['error' => true, 'message' => 'Failed to create post'];
+			}
 		}
 	}
 	elseif($action == 'profileimg'){
-		require_once('../models/user.class.php');
-		$user = new User();
-		$img = !isset($_FILES['upload_image']) ? '' : $_FILES['upload_image'];
-		$result = $user->UpdateProfileImg($img);
-		if ($result !== false){
-			list($pid,$img) = explode(',',$result);
-			$json = [
-				'updateimg' => true,
-				'img' => $img,
-				'pid' => $pid
-			];
+		if (session_status() == PHP_SESSION_NONE) {
+			session_start();
+		}
+		if (!isset($_SESSION['IS_LOGGED']) || !$_SESSION['IS_LOGGED'] || !isset($_SESSION['uid'])) {
+			$json = ['error' => true, 'message' => 'Please login first'];
+		} else {
+			require_once('../models/user.class.php');
+			$user = new User();
+			$img = !isset($_FILES['upload_image']) ? '' : $_FILES['upload_image'];
+			$result = $user->UpdateProfileImg($img);
+			if ($result !== false){
+				list($pid,$img) = explode(',',$result);
+				$json = [
+					'updateimg' => true,
+					'img' => $img,
+					'pid' => $pid
+				];
+			} else {
+				$json = ['error' => true, 'message' => 'Failed to upload image. Only JPEG images under 7MB are allowed.'];
+			}
 		}
 	}
 	elseif($action == 'coverimg'){
@@ -198,20 +216,29 @@ else{
 		}
 	}
 	elseif($action == 'addcomment'){
-		require_once('../models/post.class.php');
-		$post = new Post();
-		$text = !isset($_POST['commentText']) ? '' : htmlentities(trim($_POST['commentText']));
-		$postid = !isset($_POST['postid']) ? '' : htmlentities(trim($_POST['postid']));
-		$img = !isset($_FILES['commentImage']) ? '' : $_FILES['commentImage'];
-		$result = $post->createPost($text,$img,'comment',$postid);
-		if ($result !== false){
-			list($commentid,$comment_counter) = explode(',',$result);
-			$json = [
-				'success' => true,
-				'commentid' => $commentid,
-				'comment_counter' => $comment_counter,
-				'postid' => $postid
-			];
+		if (session_status() == PHP_SESSION_NONE) {
+			session_start();
+		}
+		if (!isset($_SESSION['IS_LOGGED']) || !$_SESSION['IS_LOGGED'] || !isset($_SESSION['uid'])) {
+			$json = ['error' => true, 'message' => 'Please login first'];
+		} else {
+			require_once('../models/post.class.php');
+			$post = new Post();
+			$text = !isset($_POST['commentText']) ? '' : htmlentities(trim($_POST['commentText']));
+			$postid = !isset($_POST['postid']) ? '' : htmlentities(trim($_POST['postid']));
+			$img = !isset($_FILES['commentImage']) ? '' : $_FILES['commentImage'];
+			$result = $post->createPost($text,$img,'comment',$postid);
+			if ($result !== false){
+				list($commentid,$comment_counter) = explode(',',$result);
+				$json = [
+					'success' => true,
+					'commentid' => $commentid,
+					'comment_counter' => $comment_counter,
+					'postid' => $postid
+				];
+			} else {
+				$json = ['error' => true, 'message' => 'Failed to add comment'];
+			}
 		}
 	}
 	elseif($action == 'settings'){

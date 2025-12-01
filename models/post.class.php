@@ -31,29 +31,36 @@ class Post {
 				$id = $_SESSION['uid'];
 				if(isset($img['name']) && $img['name'] != "")
 				{
-					// Validate image upload securely
-					$validation = Security::validateImageUpload($img);
+					// Validate file upload (supports images and PDFs)
+					$validation = Security::validateFileUpload($img);
 					if($validation['valid'])
 					{
-						//everything is fine
 						$folder = "../uploads/" . $id . "/";
 
-						//create folder with secure permissions
+						// Create folder with secure permissions
 						if(!file_exists($folder))
 						{
 							mkdir($folder, 0755, true);
 						}
-						require_once('../controler/image.controler.php');
-						$image = new Image();
-
-						// Use secure random filename
-						$output_filename = Security::generateSecureFilename('jpg');
-						$filename = $folder . $output_filename;
-						move_uploaded_file($img['tmp_name'], $filename);
-
-						$image->resize_image($filename,$filename,1500,1500);
-						$myimg = $output_filename;
-						$hasimage = 1;
+						
+						if ($validation['filetype'] === 'pdf') {
+							// Handle PDF upload
+							$output_filename = Security::generateSecureFilename('pdf');
+							$filename = $folder . $output_filename;
+							move_uploaded_file($img['tmp_name'], $filename);
+							$myimg = $output_filename;
+							$hasimage = 2; // 2 = PDF file
+						} else {
+							// Handle image upload
+							require_once('../controler/image.controler.php');
+							$image = new Image();
+							$output_filename = Security::generateSecureFilename('jpg');
+							$filename = $folder . $output_filename;
+							move_uploaded_file($img['tmp_name'], $filename);
+							$image->resize_image($filename,$filename,1500,1500);
+							$myimg = $output_filename;
+							$hasimage = 1; // 1 = image
+						}
 					}
 				}
 			}
@@ -65,7 +72,7 @@ class Post {
 			}
 			if ($parent == 0){
 				$stmt = $this->_link->prepare('INSERT INTO posts (post,postimg,owner,likes,comments,has_image,parent,is_profileimg) VALUES (?,?,?,?,?,?,?,?)');
-				$stmt->bindParam(1,$post,PDO::PARAM_LOB);
+				$stmt->bindParam(1,$post,PDO::PARAM_STR);
 				$stmt->bindParam(2,$myimg,PDO::PARAM_STR);
 				$stmt->bindParam(3,$this->_id,PDO::PARAM_INT);
 				$stmt->bindParam(4,$parent,PDO::PARAM_INT);

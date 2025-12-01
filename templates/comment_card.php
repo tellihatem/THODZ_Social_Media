@@ -4,6 +4,7 @@
  * Required variables: $comment, $commentUser, $commentUserImg, $commentImage, $currentUserId
  */
 if (!isset($comment) || !is_array($comment)) return;
+require_once(__DIR__ . '/../models/security.class.php');
 ?>
 <div class="comment" id="comment_<?php echo $comment['pid']; ?>">
     <a href="./profile.php?uid=<?php echo $comment['owner']; ?>">
@@ -14,7 +15,7 @@ if (!isset($comment) || !is_array($comment)) return;
             <a href="./profile.php?uid=<?php echo $comment['owner']; ?>" class="comment-author">
                 <?php echo htmlspecialchars($commentUser['fname'] . ' ' . $commentUser['lname']); ?>
             </a>
-            <p class="comment-text"><?php echo html_entity_decode($comment['post']); ?></p>
+            <p class="comment-text"><?php echo Security::makeLinksClickable(html_entity_decode($comment['post'])); ?></p>
         </div>
         <?php if (!empty($commentImage) && file_exists($commentImage)): ?>
         <img src="<?php echo htmlspecialchars($commentImage); ?>" alt="Comment image" class="comment-image">

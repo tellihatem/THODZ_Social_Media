@@ -441,7 +441,7 @@ $currentUserImg = $images->get_thumb_profile($currentUser['profileimg']);
                             <label class="modal-add-icon photo" for="postImageInput">
                                 <i class="fas fa-images"></i>
                             </label>
-                            <input type="file" name="image" id="postImageInput" accept="image/*" data-preview="postImagePreview" style="display: none;">
+                            <input type="file" name="image" id="postImageInput" accept="image/*,.pdf,application/pdf" data-preview="postImagePreview" style="display: none;">
                         </div>
                     </div>
                 </div>

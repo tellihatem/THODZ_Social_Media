@@ -4,6 +4,7 @@
  * Required variables: $POST, $postUser, $postUserImg, $postImage, $isOwner, $currentUserId, $currentUserImg
  */
 if (!isset($POST) || !is_array($POST)) return;
+require_once(__DIR__ . '/../models/security.class.php');
 ?>
 <div class="card post" data-post-id="<?php echo $POST['pid']; ?>">
     <div class="post-header">
@@ -22,7 +23,7 @@ if (!isset($POST) || !is_array($POST)) return;
             <div class="post-menu">
                 <button class="post-menu-item edit-post-btn" 
                         data-post-id="<?php echo $POST['pid']; ?>"
-                        data-post-text="<?php echo htmlspecialchars($POST['post'] ?? ''); ?>">
+                        data-post-text="<?php echo htmlspecialchars(html_entity_decode($POST['post'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                     <i class="fas fa-edit"></i> Edit Post
                 </button>
                 <button class="post-menu-item danger delete-post-btn" 
@@ -36,12 +37,22 @@ if (!isset($POST) || !is_array($POST)) return;
 
     <?php if (!empty($POST['post'])): ?>
     <div class="post-content">
-        <p class="post-text"><?php echo html_entity_decode($POST['post']); ?></p>
+        <p class="post-text"><?php echo Security::makeLinksClickable(html_entity_decode($POST['post'])); ?></p>
     </div>
     <?php endif; ?>
 
-    <?php if (!empty($postImage) && file_exists($postImage)): ?>
-    <img src="<?php echo htmlspecialchars($postImage); ?>" alt="Post image" class="post-image">
+    <?php if (!empty($postImage)): ?>
+        <?php if (($POST['has_image'] ?? 0) == 2): ?>
+            <!-- PDF attachment -->
+            <div class="post-pdf">
+                <a href="<?php echo htmlspecialchars($postImage); ?>" target="_blank" class="pdf-link">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>View PDF Document</span>
+                </a>
+            </div>
+        <?php elseif (file_exists($postImage)): ?>
+            <img src="<?php echo htmlspecialchars($postImage); ?>" alt="Post image" class="post-image">
+        <?php endif; ?>
     <?php endif; ?>
 
     <div class="post-stats">

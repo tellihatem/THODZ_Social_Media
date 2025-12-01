@@ -181,4 +181,78 @@ class Security {
     public static function generateSecureFilename($extension = 'jpg') {
         return 'THODZ_' . bin2hex(random_bytes(16)) . '.' . $extension;
     }
+    
+    /**
+     * Validate PDF upload
+     */
+    public static function validatePdfUpload($file, $maxSize = 10485760) { // 10MB default
+        if (!isset($file['tmp_name']) || empty($file['tmp_name'])) {
+            return ['valid' => false, 'error' => 'No file uploaded'];
+        }
+        
+        // Check for upload errors
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return ['valid' => false, 'error' => 'Upload error: ' . $file['error']];
+        }
+        
+        // Check file size
+        if ($file['size'] > $maxSize) {
+            return ['valid' => false, 'error' => 'File too large (max 10MB)'];
+        }
+        
+        // Check MIME type
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+        if ($mimeType !== 'application/pdf') {
+            return ['valid' => false, 'error' => 'Only PDF files are allowed'];
+        }
+        
+        // Verify PDF header (magic bytes)
+        $handle = fopen($file['tmp_name'], 'rb');
+        $header = fread($handle, 5);
+        fclose($handle);
+        if ($header !== '%PDF-') {
+            return ['valid' => false, 'error' => 'Invalid PDF file'];
+        }
+        
+        return ['valid' => true, 'mime' => $mimeType];
+    }
+    
+    /**
+     * Validate file upload (image or PDF)
+     */
+    public static function validateFileUpload($file, $maxSize = 10485760) {
+        if (!isset($file['tmp_name']) || empty($file['tmp_name'])) {
+            return ['valid' => false, 'error' => 'No file uploaded', 'type' => null];
+        }
+        
+        // Check MIME type to determine file type
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+        
+        if ($mimeType === 'application/pdf') {
+            $result = self::validatePdfUpload($file, $maxSize);
+            $result['filetype'] = 'pdf';
+            return $result;
+        } elseif (in_array($mimeType, ['image/jpeg', 'image/png', 'image/gif'])) {
+            $result = self::validateImageUpload($file, $maxSize);
+            $result['filetype'] = 'image';
+            return $result;
+        }
+        
+        return ['valid' => false, 'error' => 'Only images (JPEG, PNG, GIF) and PDF files are allowed', 'filetype' => null];
+    }
+    
+    /**
+     * Convert URLs in text to clickable links
+     */
+    public static function makeLinksClickable($text) {
+        // Pattern to match URLs
+        $pattern = '/(https?:\/\/[^\s<>"\']+)/i';
+        
+        // Replace URLs with anchor tags
+        $replacement = '<a href="$1" target="_blank" rel="noopener noreferrer" class="post-link">$1</a>';
+        
+        return preg_replace($pattern, $replacement, $text);
+    }
 }

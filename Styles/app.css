@@ -2541,3 +2541,49 @@ img {
     padding: 12px;
   }
 }
+
+/* ============================================
+   POST LINKS & PDF ATTACHMENTS
+   ============================================ */
+
+/* Clickable links in posts */
+.post-link {
+  color: var(--text-link);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.post-link:hover {
+  text-decoration: underline;
+}
+
+/* PDF attachment styling */
+.post-pdf {
+  margin: 12px 16px;
+  padding: 16px;
+  background: var(--bg-input);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.pdf-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.pdf-link i {
+  font-size: 32px;
+  color: #e74c3c;
+}
+
+.pdf-link:hover {
+  color: var(--primary);
+}
+
+.pdf-link:hover i {
+  color: #c0392b;
+}
