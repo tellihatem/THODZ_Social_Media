@@ -1,0 +1,2 @@
+-change redirect url
+-change require once for image class in post class

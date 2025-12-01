@@ -1,0 +1,9 @@
+<?php 
+        if (isset($_GET['redirect'])){
+            if ($_GET['redirect'] == "settings"){
+    ?>
+        here we add our script to get the profile tab
+    <?php
+            }
+        }
+    ?>

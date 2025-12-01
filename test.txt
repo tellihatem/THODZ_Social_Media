@@ -1,0 +1,13 @@
+<a href="javascript:doLike('POST', <?php echo($POST['pid']); ?>)" style="width: 100%;display: flex;align-items: center;justify-content: center;text-decoration: none;">
+    <div class="likes_buttons_links">
+        <i class="far fa-thumbs-up"></i>
+        <span>Like</span>
+    </div>
+</a>
+
+<a href="#" id="post-like" data-id="<?php echo($POST['pid']); ?>" style="width: 100%;display: flex;align-items: center;justify-content: center;text-decoration: none;">
+    <div class="likes_buttons_links">
+        <i class="far fa-thumbs-up"></i>
+        <span>Like</span>
+    </div>
+</a>
