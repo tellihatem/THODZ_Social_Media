@@ -60,7 +60,7 @@ class Login{
 		// Rehash password if using legacy MD5
 		if (Security::needsRehash($user['password'])) {
 			$newHash = Security::hashPassword($plainPassword);
-			$updateStmt = $this->_link->prepare('UPDATE users SET password = ? WHERE uid = ? LIMIT 1');
+			$updateStmt = $this->_link->prepare('UPDATE users SET password = ? WHERE uid = ?');
 			$updateStmt->bindParam(1, $newHash, PDO::PARAM_STR);
 			$updateStmt->bindParam(2, $user['uid'], PDO::PARAM_INT);
 			$updateStmt->execute();
@@ -73,7 +73,7 @@ class Login{
 		
 		// Update user status to online
 		$online = 'online';
-		$stmt = $this->_link->prepare('UPDATE users SET status = ? WHERE uid = ? LIMIT 1');
+		$stmt = $this->_link->prepare('UPDATE users SET status = ? WHERE uid = ?');
 		$stmt->bindParam(1, $online, PDO::PARAM_STR);
 		$stmt->bindParam(2, $user['uid'], PDO::PARAM_INT);
 		$stmt->execute();

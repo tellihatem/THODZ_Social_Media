@@ -8,9 +8,12 @@ RUN apt-get update && apt-get install -y \
     libwebp-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions (PDO MySQL + GD for image processing)
+# Install PostgreSQL dev library
+RUN apt-get update && apt-get install -y libpq-dev && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions (PDO MySQL + PDO PostgreSQL + GD for image processing)
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql exif
+    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql pdo_pgsql exif
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite

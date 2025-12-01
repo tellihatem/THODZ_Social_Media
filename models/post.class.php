@@ -74,11 +74,11 @@ class Post {
 				$stmt->bindParam(7,$parent,PDO::PARAM_INT);
 				$stmt->bindParam(8,$is_profile_img,PDO::PARAM_INT);
 				$stmt->execute();
-				return $this->_link->lastInsertId();
+				return $this->_link->lastInsertId(Database::isPostgres() ? 'posts_pid_seq' : null);
 			}
 			elseif($type == 'comment' && $parent > 0){
 				$zero = 0;
-				$stmt = $this->_link->prepare('UPDATE posts SET comments = comments + 1 WHERE pid = ? limit 1;');
+				$stmt = $this->_link->prepare('UPDATE posts SET comments = comments + 1 WHERE pid = ?;');
 				$stmt->bindParam(1,$parent,PDO::PARAM_INT);
 				$stmt->execute();
 				//get the number of comment for that post
@@ -97,7 +97,7 @@ class Post {
 				$stmt->bindParam(7,$parent,PDO::PARAM_INT);
 				$stmt->bindParam(8,$zero,PDO::PARAM_INT);
 				$stmt->execute();
-				$lastInsertId = $this->_link->lastInsertId();
+				$lastInsertId = $this->_link->lastInsertId(Database::isPostgres() ? 'posts_pid_seq' : null);
 				return $lastInsertId . "," . $comment_counter;
 			}
 		}
@@ -174,7 +174,7 @@ class Post {
 		$post = nl2br($post);
 
 		// Update text
-		$stmt = $this->_link->prepare('UPDATE posts SET post = ? WHERE pid = ? AND owner = ? limit 1');
+		$stmt = $this->_link->prepare('UPDATE posts SET post = ? WHERE pid = ? AND owner = ?');
 		$stmt->bindParam(1, $post, PDO::PARAM_STR);
 		$stmt->bindParam(2, $postid, PDO::PARAM_INT);
 		$stmt->bindParam(3, $id, PDO::PARAM_INT);
@@ -182,7 +182,7 @@ class Post {
 		
 		// Update image if changed
 		if ($updateImage) {
-			$stmt = $this->_link->prepare('UPDATE posts SET postimg = ?, has_image = ? WHERE pid = ? AND owner = ? limit 1');
+			$stmt = $this->_link->prepare('UPDATE posts SET postimg = ?, has_image = ? WHERE pid = ? AND owner = ?');
 			$stmt->bindParam(1, $myimg, PDO::PARAM_STR);
 			$stmt->bindParam(2, $hasimage, PDO::PARAM_INT);
 			$stmt->bindParam(3, $postid, PDO::PARAM_INT);
@@ -283,10 +283,10 @@ class Post {
 		$child_post = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		try {
 			$this->_link->beginTransaction();
-			$stmt = $this->_link->prepare('DELETE FROM posts WHERE pid = ? limit 1;');
+			$stmt = $this->_link->prepare('DELETE FROM posts WHERE pid = ?;');
 			$stmt->bindParam(1,$id,PDO::PARAM_INT);
 			$stmt->execute();
-			$stmt = $this->_link->prepare('DELETE FROM likes WHERE contentid = ? AND type = ? limit 1;');
+			$stmt = $this->_link->prepare('DELETE FROM likes WHERE contentid = ? AND type = ?;');
 			$stmt->bindParam(1,$id,PDO::PARAM_INT);
 			$stmt->bindParam(2,$type,PDO::PARAM_STR);
 			$stmt->execute();
@@ -294,7 +294,7 @@ class Post {
 			$stmt->bindParam(1,$id,PDO::PARAM_INT);
 			$stmt->execute();
 			foreach ($child_post as $child){
-				$stmt = $this->_link->prepare('DELETE FROM likes WHERE contentid = ? AND type = ? limit 1');
+				$stmt = $this->_link->prepare('DELETE FROM likes WHERE contentid = ? AND type = ?');
 				$stmt->bindParam(1,$child['pid'],PDO::PARAM_INT);
 				$stmt->bindParam(2,$type,PDO::PARAM_STR);
 				$stmt->execute();
@@ -311,13 +311,13 @@ class Post {
 	            throw $e;
 	        }
     	}
-		/*$stmt = $this->_link->prepare('DELETE FROM posts WHERE pid = ? limit 1;');
+		/*$stmt = $this->_link->prepare('DELETE FROM posts WHERE pid = ?;');
 		$stmt->bindParam(1,$id,PDO::PARAM_INT);
 		$stmt->execute();*/
 
 
 		/*//delete from likes
-		$stmt = $this->_link->prepare('DELETE FROM likes WHERE contentid = ? AND type = ? limit 1;');
+		$stmt = $this->_link->prepare('DELETE FROM likes WHERE contentid = ? AND type = ?;');
 		$stmt->bindParam(1,$id,PDO::PARAM_INT);
 		$stmt->bindParam(2,$type,PDO::PARAM_STR);
 		$stmt->execute();*/
@@ -326,7 +326,7 @@ class Post {
 		$stmt->bindParam(1,$id,PDO::PARAM_INT);
 		$stmt->execute();*/
 		if ($parent > 0){
-			$stmt = $this->_link->prepare('UPDATE posts SET comments = comments - 1 WHERE pid = ? limit 1');
+			$stmt = $this->_link->prepare('UPDATE posts SET comments = comments - 1 WHERE pid = ?');
 			$stmt->bindParam(1,$parent,PDO::PARAM_INT);
 			$stmt->execute();
 			//get the number of comment for that post
@@ -350,7 +350,7 @@ class Post {
 
 			if (in_array($type,$allowed)){
 				/*Our Work Start from here*/
-				$stmt = $this->_link->prepare('SELECT likes from likes WHERE type = ? && contentid = ? limit 1;');
+				$stmt = $this->_link->prepare('SELECT likes from likes WHERE type = ? AND contentid = ? LIMIT 1;');
 				$stmt->bindParam(1,$type,PDO::PARAM_STR);
 				$stmt->bindParam(2,$pid,PDO::PARAM_INT);
 				$stmt->execute();
@@ -371,7 +371,7 @@ class Post {
 						$likes[] = $arr; // add the new record
 
 						$likes_string = json_encode($likes);
-						$stmt = $this->_link->prepare('UPDATE likes SET likes = ? WHERE type = ? && contentid = ? limit 1;');
+						$stmt = $this->_link->prepare('UPDATE likes SET likes = ? WHERE type = ? AND contentid = ?;');
 						$stmt->bindParam(1,$likes_string,PDO::PARAM_STR);
 						$stmt->bindParam(2,$type,PDO::PARAM_STR);
 						$stmt->bindParam(3,$pid,PDO::PARAM_INT);
@@ -395,7 +395,7 @@ class Post {
 
 						$likes_string = json_encode($likes);
 						
-						$stmt = $this->_link->prepare('UPDATE likes SET likes = ? WHERE type = ? && contentid = ? limit 1;');
+						$stmt = $this->_link->prepare('UPDATE likes SET likes = ? WHERE type = ? AND contentid = ?;');
 						$stmt->bindParam(1,$likes_string,PDO::PARAM_STR);
 						$stmt->bindParam(2,$type,PDO::PARAM_STR);
 						$stmt->bindParam(3,$pid,PDO::PARAM_INT);

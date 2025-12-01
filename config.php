@@ -11,11 +11,15 @@ $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
 define('BASE_URL', getenv('BASE_URL') ?: "{$protocol}://{$host}");
 
-// Database settings (used by Docker, can be overridden)
-define('DB_HOST', getenv('DB_HOST') ?: 'db');
-define('DB_NAME', getenv('DB_NAME') ?: 'thodz');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: 'root');
+// Database settings
+// For Koyeb (PostgreSQL): Set DATABASE_URL or individual DATABASE_* env vars
+// For local Docker (MySQL): Uses defaults below
+define('DB_DRIVER', getenv('DATABASE_DRIVER') ?: (getenv('DATABASE_URL') ? 'pgsql' : 'mysql'));
+define('DB_HOST', getenv('DATABASE_HOST') ?: (getenv('DB_HOST') ?: 'db'));
+define('DB_NAME', getenv('DATABASE_NAME') ?: (getenv('DB_NAME') ?: 'THODZ'));
+define('DB_USER', getenv('DATABASE_USER') ?: (getenv('DB_USER') ?: 'root'));
+define('DB_PASS', getenv('DATABASE_PASSWORD') ?: (getenv('DB_PASS') ?: ''));
+define('DB_PORT', getenv('DATABASE_PORT') ?: (DB_DRIVER === 'pgsql' ? '5432' : '3306'));
 
 // Email settings (Gmail SMTP)
 // Credentials are loaded from environment variables for security

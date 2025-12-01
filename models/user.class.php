@@ -128,7 +128,7 @@ class User {
 					
 					if (move_uploaded_file($file['tmp_name'], $output_path)){
 						// Update database
-						$stmt = $this->_link->prepare('UPDATE users SET coverimg = ? WHERE uid = ? LIMIT 1');
+						$stmt = $this->_link->prepare('UPDATE users SET coverimg = ? WHERE uid = ?');
 						$stmt->bindParam(1, $output_filename, PDO::PARAM_STR);
 						$stmt->bindParam(2, $id, PDO::PARAM_INT);
 						$stmt->execute();
@@ -151,7 +151,7 @@ class User {
 			if(is_numeric($id)){
 				$value = '"uid":'.$id;
 				$passThis = "%" . $value . "%";
-				$stmt = $this->_link->prepare("SELECT * FROM likes WHERE type = ? && likes LIKE ?");
+				$stmt = $this->_link->prepare("SELECT * FROM likes WHERE type = ? AND likes LIKE ?");
 				$stmt->bindParam(1,$type,PDO::PARAM_STR);
 				$stmt->bindParam(2,$passThis,PDO::PARAM_STR);
 				$stmt->execute();
@@ -207,7 +207,7 @@ class User {
 		$allowed[] = 'comment';
 
 		if (in_array($type,$allowed) && is_numeric($id)){
-			$stmt = $this->_link->prepare("SELECT * FROM likes WHERE type = ? && contentid = ? limit 1");
+			$stmt = $this->_link->prepare("SELECT * FROM likes WHERE type = ? AND contentid = ? LIMIT 1");
 			$stmt->bindParam(1,$type,PDO::PARAM_STR);
 			$stmt->bindParam(2,$id,PDO::PARAM_INT);
 			$stmt->execute();
@@ -247,7 +247,7 @@ class User {
 				$limit = 10 - sizeof($output);
 			}
 			if ($limit > 0){
-				$stmt = $this->_link->prepare("SELECT * FROM users WHERE uid != ? ORDER BY RAND() limit ?");
+				$stmt = $this->_link->prepare("SELECT * FROM users WHERE uid != ? ORDER BY RANDOM() LIMIT ?");
 				$stmt->bindParam(1,$id,PDO::PARAM_INT);
 				$stmt->bindParam(2,$limit,PDO::PARAM_INT);
 				$stmt->execute();
@@ -295,7 +295,7 @@ class User {
 	public function getSearchUsers($id,$value){
 		if(is_numeric($id)){
 			$passThis = "%" . $value . "%";
-			$stmt = $this->_link->prepare("SELECT * FROM users WHERE uid != ? AND (LOWER(fname) LIKE ? || LOWER(lname) LIKE ?)");
+			$stmt = $this->_link->prepare("SELECT * FROM users WHERE uid != ? AND (LOWER(fname) LIKE ? OR LOWER(lname) LIKE ?)");
 			$stmt->bindParam(1,$id,PDO::PARAM_INT);
 			$stmt->bindParam(2,$passThis,PDO::PARAM_STR);
 			$stmt->bindParam(3,$passThis,PDO::PARAM_STR);
@@ -322,7 +322,7 @@ class User {
 	public function offline($uid){
 		if (is_numeric($uid)){
 			$offline = "offline";
-			$stmt = $this->_link->prepare('UPDATE users SET status = ? WHERE uid = ? limit 1');
+			$stmt = $this->_link->prepare('UPDATE users SET status = ? WHERE uid = ?');
 			$stmt->bindParam(1,$offline,PDO::PARAM_STR);
 			$stmt->bindParam(2,$uid,PDO::PARAM_INT);
 			$stmt->execute();
@@ -336,13 +336,13 @@ class User {
 		if (!is_numeric($uid)) return false;
 		
 		try {
-			$stmt = $this->_link->prepare('UPDATE users SET status = ?, last_activity = NOW() WHERE uid = ? LIMIT 1');
+			$stmt = $this->_link->prepare('UPDATE users SET status = ?, last_activity = NOW() WHERE uid = ?');
 			$stmt->bindParam(1, $status, PDO::PARAM_STR);
 			$stmt->bindParam(2, $uid, PDO::PARAM_INT);
 			return $stmt->execute();
 		} catch (PDOException $e) {
 			// If last_activity column doesn't exist, just update status
-			$stmt = $this->_link->prepare('UPDATE users SET status = ? WHERE uid = ? LIMIT 1');
+			$stmt = $this->_link->prepare('UPDATE users SET status = ? WHERE uid = ?');
 			$stmt->bindParam(1, $status, PDO::PARAM_STR);
 			$stmt->bindParam(2, $uid, PDO::PARAM_INT);
 			return $stmt->execute();
@@ -355,12 +355,15 @@ class User {
 	 */
 	public function getAllOnlineStatuses() {
 		$statuses = [];
+		$intervalSql = Database::isPostgres() 
+			? "(NOW() - INTERVAL '2 MINUTE')" 
+			: "DATE_SUB(NOW(), INTERVAL 2 MINUTE)";
 		
 		try {
 			// Try with last_activity column first
 			$stmt = $this->_link->prepare(
 				"SELECT uid, status, last_activity,
-				 CASE WHEN last_activity > DATE_SUB(NOW(), INTERVAL 2 MINUTE) AND status = 'online' 
+				 CASE WHEN last_activity > {$intervalSql} AND status = 'online' 
 				      THEN 'online' ELSE 'offline' END as real_status
 				 FROM users"
 			);

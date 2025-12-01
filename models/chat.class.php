@@ -53,7 +53,7 @@ class Chat {
 		try {
 			$stmt = $this->_link->prepare(
 				'SELECT COUNT(*) as count FROM messages 
-				 WHERE outgoing_msg_id = ? AND date > DATE_SUB(NOW(), INTERVAL 1 MINUTE)'
+				 WHERE outgoing_msg_id = ? AND date > (NOW() - INTERVAL \'1 MINUTE\')'
 			);
 			$stmt->bindParam(1, $this->_currentUserId, PDO::PARAM_INT);
 			$stmt->execute();
@@ -158,7 +158,7 @@ class Chat {
 		//get the recent users i have chat with
 		$user = new User();
 		$users;
-		$stmt = $this->_link->prepare('SELECT * FROM messages WHERE incoming_msg_id = ? || outgoing_msg_id = ? ORDER BY mid desc');
+		$stmt = $this->_link->prepare('SELECT * FROM messages WHERE incoming_msg_id = ? OR outgoing_msg_id = ? ORDER BY mid DESC');
 		$stmt->bindParam(1,$id,PDO::PARAM_INT);
 		$stmt->bindParam(2,$id,PDO::PARAM_INT);
 		$stmt->execute();
@@ -233,7 +233,7 @@ class Chat {
 				$stmt->bindParam(2,$uid,PDO::PARAM_INT);
 				$stmt->bindParam(3,$message,PDO::PARAM_STR);
 				$stmt->execute();
-				return $this->_link->lastInsertId();
+				return $this->_link->lastInsertId(Database::isPostgres() ? 'messages_mid_seq' : null);
 			}
 		}
 		return false;
@@ -274,7 +274,7 @@ class Chat {
 			$stmt->bindParam(5, $audio, PDO::PARAM_STR);
 			$stmt->execute();
 			
-			return ['success' => true, 'message_id' => $this->_link->lastInsertId()];
+			return ['success' => true, 'message_id' => $this->_link->lastInsertId(Database::isPostgres() ? 'messages_mid_seq' : null)];
 		} catch (PDOException $e) {
 			error_log('Chat insert error: ' . $e->getMessage());
 			return ['success' => false, 'error' => 'Failed to send message'];

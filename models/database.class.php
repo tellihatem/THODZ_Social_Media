@@ -1,21 +1,52 @@
 <?php 
 
-class Database{
+require_once __DIR__ . '/../config.php';
 
-	const DB_SERVER = 'db'; // Use 'db' for Docker, 'localhost' for local install
-	const DB_USER = "root";
-	const DB_PASS = "";
-	const DB_NAME = "THODZ";
+class Database {
 
-	function connect(){
+	private static $instance = null;
+
+	function connect() {
+		if (self::$instance !== null) {
+			return self::$instance;
+		}
+
 		$conn = null;
 		try {
-		    $conn = new PDO('mysql:host='.self::DB_SERVER.';dbname='.self::DB_NAME, self::DB_USER, self::DB_PASS);
-		    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$driver = defined('DB_DRIVER') ? DB_DRIVER : 'mysql';
+			$host = defined('DB_HOST') ? DB_HOST : 'db';
+			$dbname = defined('DB_NAME') ? DB_NAME : 'THODZ';
+			$user = defined('DB_USER') ? DB_USER : 'root';
+			$pass = defined('DB_PASS') ? DB_PASS : '';
+			$port = defined('DB_PORT') ? DB_PORT : ($driver === 'pgsql' ? '5432' : '3306');
+
+			if ($driver === 'pgsql') {
+				// PostgreSQL (Koyeb)
+				$dsn = "pgsql:host={$host};port={$port};dbname={$dbname}";
+			} else {
+				// MySQL/MariaDB (local Docker)
+				$dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
+			}
+
+			$conn = new PDO($dsn, $user, $pass);
+			$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+			
+			self::$instance = $conn;
 		} catch (PDOException $e) {
-		    print "Error!: " . $e->getMessage() . "<br/>";
-		    die();
+			error_log("Database connection error: " . $e->getMessage());
+			die("Database connection failed. Please check your configuration.");
 		}
 		return $conn;
+	}
+
+	// Get the database driver type
+	static function getDriver() {
+		return defined('DB_DRIVER') ? DB_DRIVER : 'mysql';
+	}
+
+	// Check if using PostgreSQL
+	static function isPostgres() {
+		return self::getDriver() === 'pgsql';
 	}
 }

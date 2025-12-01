@@ -49,7 +49,7 @@ class Forget {
 	private function UpdatePassword($email,$token,$password){
 		$password = $this->hashPassword($password);
 		$buffer = "";
-		$stmt = $this->_link->prepare('UPDATE users SET password = ?, token = ? WHERE email = ? AND token = ? limit 1');
+		$stmt = $this->_link->prepare('UPDATE users SET password = ?, token = ? WHERE email = ? AND token = ?');
 		$stmt->bindParam(1,$password,PDO::PARAM_STR);
 		$stmt->bindParam(2,$buffer,PDO::PARAM_STR);
 		$stmt->bindParam(3,$email,PDO::PARAM_STR);
@@ -73,7 +73,7 @@ class Forget {
 		else{
 			$one = 1;
 			$token = (new CodeVerify())->SetCode();
-			$stmt = $this->_link->prepare('UPDATE users SET token = ? WHERE email = ? limit 1');
+			$stmt = $this->_link->prepare('UPDATE users SET token = ? WHERE email = ?');
 			$stmt->bindParam(1,$token, PDO::PARAM_STR);
 			$stmt->bindParam(2, $email, PDO::PARAM_STR);
 			if (!$stmt->execute()){

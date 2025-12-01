@@ -53,9 +53,9 @@ class Signup {
 			header("location: ../index.php?error=stmtfailed");
 			die();
 		}
-		$lastInsertId = $this->_link->lastInsertId();
+		$lastInsertId = $this->_link->lastInsertId(Database::isPostgres() ? 'users_uid_seq' : null);
 		$offline = "offline";
-		$stmt = $this->_link->prepare('UPDATE users SET status = ? WHERE uid = ? limit 1');
+		$stmt = $this->_link->prepare('UPDATE users SET status = ? WHERE uid = ?');
 		$stmt->bindParam(1,$offline,PDO::PARAM_STR);
 		$stmt->bindParam(2,$lastInsertId,PDO::PARAM_INT);
 		$stmt->execute();
